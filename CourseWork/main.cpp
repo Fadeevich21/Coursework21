@@ -1,11 +1,3 @@
-/* TODO:
- *  1. Добавить кнопки для выбора блока: Старт лабиринта, конец лабиринта, стена
- *  2. Добавить список для выбора эвристики
- *  3. Добавить комментарии к коду
- *  4. Проверить алгоритмы на большом кол-ве тестах (сделать симуляцию)
- */
-
-
 #include <SFML/Graphics.hpp>
 #include <iostream>
 #include <iomanip>
@@ -15,10 +7,6 @@
 #include "Header.h"
 #include "searchAlgorithms.h"
 #include "generateMaze.h"
-
-// СД типа "Функция поиска выхода из лабиринта"
-typedef t_mapCellMaze(*t_searchAlgotithm)(const t_maze &maze, const int &m, const int &n, const t_cellMaze &spawnPos,
-                                          const t_cellMaze &quitPos);
 
 t_searchAlgotithm ChoosingSearchAlgorithm(unsigned select);
 t_elMaze ChoosingElMaze(unsigned select);
@@ -58,12 +46,12 @@ int main() {
     t_maze maze = CreateMaze(m, n);
     t_cellMaze spawnPos = NONE_CELL_MAZE;
     t_cellMaze quitPos = NONE_CELL_MAZE;
-
     t_searchAlgotithm searchAlgorithm = BFS;
     t_elMaze elMaze = wall;
 
     RenderWindow window(VideoMode(750, 500), L"Поиск пути в лабиринте");
 
+    // Установка шрифта
     Font font;
     if (!font.loadFromFile("fonts/arial.ttf"))
     {
@@ -209,7 +197,7 @@ int main() {
                     break;
 
                 case Event::MouseButtonPressed: /* Нажата кнопка мыши */
-                    // Получение координат мыши в поле
+                    // Получение координат мыши в поле графического окна
                     Vector2i pixelPos = Mouse::getPosition(window);
                     Vector2f pos = window.mapPixelToCoords(pixelPos);
 
@@ -262,7 +250,7 @@ int main() {
                                 t_mapCellMaze visitedCellMaze = searchAlgorithm(maze, m, n, spawnPos, quitPos);
                                 clock_t end = clock();
 
-                                BuildPathMaze(maze, m, n, visitedCellMaze, spawnPos, quitPos);
+                                BuildPathMaze(maze, visitedCellMaze, spawnPos, quitPos);
                             }
 
                             // Проверка нажатия ЛКМ на кнопку генерирования лабиринта
@@ -400,6 +388,46 @@ int main() {
     return 0;
 }
 
+#define ColorBlank 255, 255, 255        /* RGB цвет для пустых клеток */
+#define ColorRoad 255, 255, 255         /* RGB цвет для дороги */
+#define ColorWall 46, 64, 83            /* RGB цвет для стены */
+#define ColorSpawn 203, 67, 53          /* RGB цвет для входа в лабиринт */
+#define ColorQuit 255, 0, 255           /* RGB цвет для выхода из лабиринта */
+#define ColorWay 26, 188, 156           /* RGB цвет для пути */
+#define ColorDefault 46, 64, 83         /* RGB цвет для обычных клеток */
+
+// Возвращет цвет клетки elMaze
+Color GetColor(const t_elMaze &elMaze)
+{
+    Color col;
+    switch (elMaze)
+    {
+        case blank:
+            col = Color(ColorBlank);
+            break;
+        case road:
+            col = Color(ColorRoad);
+            break;
+        case wall:
+            col = Color(ColorWall);
+            break;
+        case spawn:
+            col = Color(ColorSpawn);
+            break;
+        case quit:
+            col = Color(ColorQuit);
+            break;
+        case way:
+            col = Color(ColorWay);
+            break;
+        default:
+            col = Color(ColorDefault);
+            break;
+    }
+
+    return col;
+}
+
 // Выводит элементы графического окна
 void Draw(RenderWindow &window, vector<_Button> vecButton, vector<ComboBox> vecComboBox, vector<Text> vecText, t_maze maze)
 {
@@ -431,30 +459,7 @@ void Draw(RenderWindow &window, vector<_Button> vecButton, vector<ComboBox> vecC
         {
             shape.setPosition(y * 25, x * 25);
 
-            switch (maze[x][y])
-            {
-                case blank:
-                    col = Color::White;
-                    break;
-                case road:
-                    col = Color::White;
-                    break;
-                case wall:
-                    col = Color(46, 64, 83);
-                    break;
-                case spawn:
-                    col = Color(203, 67, 53);
-                    break;
-                case quit:
-                    col = Color(0, 153, 255);
-                    break;
-                case way:
-                    col = Color(26, 188, 156);
-                    break;
-                default:
-                    col = Color(46, 64, 83);
-                    break;
-            }
+            col = GetColor(maze[x][y]);
 
             shape.setFillColor(col);
             window.draw(shape);
@@ -507,7 +512,7 @@ void Draw(RenderWindow &window, vector<_Button> vecButton, vector<ComboBox> vecC
     window.display();
 }
 
-// Выбор алгоритма поиска
+// Возвращает алгоритм поиска под номером select
 t_searchAlgotithm ChoosingSearchAlgorithm(unsigned select) {
     switch (select)
     {
@@ -528,6 +533,7 @@ t_searchAlgotithm ChoosingSearchAlgorithm(unsigned select) {
     }
 }
 
+// Возвращает элемент лабиринта под номером select
 t_elMaze ChoosingElMaze(unsigned select)
 {
     switch (select)

@@ -2,23 +2,17 @@
 #include <queue>
 #include <cmath>
 
-// Элемент лабиринта - дорога лабиринта
+// Возвращает "истина", если элемент elMaze - дорога, иначе "ложь"
 #define IsRoad(elMaze) (elMaze == road)
 
-// Элемент лабиринта - вход в лабиринт
+// Возвращает "истина", если элемент elMaze - вход в лабиринт, иначе "ложь"
 #define IsSpawnPos(elMaze) (elMaze == spawn)
 
-// Элемент лабиринта - выход из лабиринта
+// Возвращает "истина", если элемент elMaze - выход из лабиринта, иначе "ложь"
 #define IsQuitPos(elMaze) (elMaze == quit)
 
-// Манхеттенское расстояние
+// Возвращает Манхеттенское расстояние между клетками cellMaze1 и cellMaze2
 #define ManhattanDistance(cellMaze1, cellMaze2) (2 * (abs((cellMaze1.first) - (cellMaze2.first)) + abs((cellMaze1.second) - (cellMaze2.second))))
-
-// Евклидово расстояние
-#define EuclideanMetric(cellMaze1, cellMaze2) (pow((cellMaze1.first) - (cellMaze2.first), 2) + pow((cellMaze1.second) - (cellMaze2.second), 2))
-
-// Расстояние Чебышёва
-#define ChebyshevDistance(cellMaze1, cellMaze2)(MAX2(abs((cellMaze1.first) - (cellMaze2.first)), abs((cellMaze1.first) - (cellMaze2.first))))
 
 // Возвращает минимальный ключ словаря _map
 #define MinKeyMap(_map)(min_element(_map.begin(), _map.end(), [](const auto &a, const auto &b){return a.second < b.second; })->first)
@@ -102,13 +96,11 @@ t_mapCellMaze DFS_iterative(const t_maze &maze, const int &m, const int &n, cons
             break;
         
         for (t_cellMaze cellMaze : mapNeighborsCellMaze[checkCellMaze])
-        {
             if (mapVisitedCellMaze.find(cellMaze) == mapVisitedCellMaze.end())
             {
                 searchStack.push(cellMaze);
                 mapVisitedCellMaze[cellMaze] = checkCellMaze;
             }
-        }
     }
 
     return mapVisitedCellMaze;
@@ -120,24 +112,6 @@ bool rec_DFS(t_mapCellMaze &mapVisitedCellMaze, t_mapNeighborsCellMaze &mapNeigh
 {
     if (cellMaze == quitPos)
         return true;
-
-/*
-        stack<t_cellMaze> searchStack;
-        for (t_cellMaze cellMaze1 : mapNeighborsCellMaze[cellMaze])
-            if (mapVisitedCellMaze.find(cellMaze1) == mapVisitedCellMaze.end())
-            {
-                searchStack.push(cellMaze1);
-                mapVisitedCellMaze[cellMaze1] = cellMaze;
-            }
-
-        while (!searchStack.empty())
-        {
-            t_cellMaze checkCellMaze = searchStack.top();
-            searchStack.pop();
-            if (rec_DFS(mapVisitedCellMaze, mapNeighborsCellMaze, quitPos, checkCellMaze))
-                return true;
-        }
-*/
 
         for (t_cellMaze checkCellMaze : mapNeighborsCellMaze[cellMaze])
             if (mapVisitedCellMaze.find(checkCellMaze) == mapVisitedCellMaze.end())
@@ -185,14 +159,12 @@ t_mapCellMaze AStar(const t_maze &maze, const int &m, const int &n,
             break;
 
         for (t_cellMaze cellMaze : mapNeighborsCellMaze[current])
-        {
             if (mapVisitedCellMaze.find(cellMaze) == mapVisitedCellMaze.end())
             {
                 costCellMaze[cellMaze] = costCellMaze[current] + 1;
                 weightCellMaze[cellMaze] = costCellMaze[cellMaze] + ManhattanDistance(cellMaze, quitPos);
                 mapVisitedCellMaze[cellMaze] = current;
             }
-        }
     }
 
     return mapVisitedCellMaze;

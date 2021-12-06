@@ -2,6 +2,10 @@
 
 #include "Header.h"
 
+// СД типа "Функция поиска выхода из лабиринта"
+typedef t_mapCellMaze(*t_searchAlgotithm)(const t_maze &maze, const int &m, const int &n, const t_cellMaze &spawnPos,
+                                          const t_cellMaze &quitPos);
+
 // Поиск в ширину (итеративный)
 t_mapCellMaze BFS(const t_maze &maze, const int &m, const int &n,
                   const t_cellMaze &spawnPos, const t_cellMaze &quitPos);
